@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>메뉴잇 x KT</title>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#f5f7fb;--card:#fff;--ink:#171a21;--muted:#6d7380;--line:#e7eaf0;
+  --brand:#d6163b;--brand2:#99132e;--soft:#fff0f3;--nav:#151820;--nav2:#222631;
+  --green:#17845b;--greenSoft:#e9f8f1;--blue:#2167d5;--blueSoft:#edf4ff;
+  --amber:#a36800;--amberSoft:#fff6df;--purple:#6b4bc3;--purpleSoft:#f2efff;
+  --danger:#c62a3f;--dangerSoft:#fff0f2;--shadow:0 10px 30px rgba(20,27,45,.07);
+  --radius:16px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic",sans-serif;color:var(--ink);background:var(--bg)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.app{min-height:100vh;display:grid;grid-template-columns:240px 1fr}
+.sidebar{background:linear-gradient(180deg,var(--nav),#101219);color:#fff;padding:24px 16px;position:sticky;top:0;height:100vh;overflow:auto}
+.logo{display:flex;align-items:center;gap:11px;padding:0 10px 22px;border-bottom:1px solid rgba(255,255,255,.08)}
+.logo-mark{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#f2355a,var(--brand2));display:grid;place-items:center;font-weight:900;font-size:12px;box-shadow:0 8px 20px rgba(214,22,59,.25)}
+.logo-title{font-weight:800;letter-spacing:-.02em}
+.logo-sub{font-size:11px;color:#9ea5b5;margin-top:2px}
+.nav{margin-top:18px;display:grid;gap:6px}
+.nav button{border:0;background:transparent;color:#b9bfcb;text-align:left;padding:11px 12px;border-radius:11px;display:flex;align-items:center;gap:10px;font-weight:650}
+.nav button:hover,.nav button.active{background:var(--nav2);color:#fff}
+.nav .count{margin-left:auto;background:rgba(255,255,255,.1);border-radius:999px;padding:2px 8px;font-size:11px}
+.side-foot{margin-top:28px;border-top:1px solid rgba(255,255,255,.08);padding:18px 10px 0;color:#9ea5b5;font-size:12px;line-height:1.6}
+.main{min-width:0}
+.topbar{height:72px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 26px;position:sticky;top:0;z-index:20}
+.top-title h1{font-size:19px;margin:0;letter-spacing:-.02em}.top-title p{font-size:12px;color:var(--muted);margin:3px 0 0}
+.top-actions{display:flex;gap:10px;align-items:center}.user-pill{display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.avatar{width:32px;height:32px;border-radius:10px;background:var(--soft);color:var(--brand);font-weight:800;display:grid;place-items:center}
+.content{padding:24px 26px 40px;max-width:1600px;margin:0 auto}
+.btn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:9px 13px;border-radius:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.btn:hover{filter:brightness(.985)}.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}.btn.dark{background:#1d2028;color:#fff;border-color:#1d2028}.btn.ghost{background:transparent}.btn.danger{background:var(--dangerSoft);color:var(--danger);border-color:#f7cdd4}.btn.smallBtn{padding:7px 10px;font-size:12px}
+.grid{display:grid;gap:14px}.grid.kpi{grid-template-columns:repeat(6,minmax(130px,1fr))}.grid.two{grid-template-columns:1.2fr .8fr}.grid.three{grid-template-columns:repeat(3,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card-pad{padding:18px}.card h3{margin:0;font-size:15px}.card-head{display:flex;align-items:center;justify-content:space-between;padding:17px 18px;border-bottom:1px solid var(--line)}
+.kpi-card{padding:17px}.kpi-label{font-size:12px;color:var(--muted)}.kpi-value{font-size:28px;font-weight:850;margin-top:5px}.kpi-foot{font-size:11px;color:var(--muted);margin-top:5px}.kpi-card.alert .kpi-value{color:var(--brand)}
+.toolbar{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-bottom:14px}.toolbar .spacer{flex:1}.input,.select,.textarea{width:100%;border:1px solid var(--line);border-radius:10px;background:#fff;padding:10px 11px;outline:none}.input:focus,.select:focus,.textarea:focus{border-color:#d3a0ac;box-shadow:0 0 0 3px var(--soft)}
+.search{position:relative;min-width:240px}.search input{padding-left:36px}.search span{position:absolute;left:12px;top:10px;color:var(--muted)}
+.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:1080px}.table th{font-size:11px;color:var(--muted);font-weight:750;text-align:left;padding:11px 12px;background:#fafbfc;border-bottom:1px solid var(--line);white-space:nowrap}.table td{padding:11px 12px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}.table tr:hover td{background:#fcfcfd}.table tr.clickable{cursor:pointer}
+.badge{display:inline-flex;align-items:center;border-radius:999px;padding:4px 9px;font-size:11px;font-weight:800;white-space:nowrap}.b-new{background:var(--blueSoft);color:var(--blue)}.b-active{background:var(--amberSoft);color:var(--amber)}.b-win{background:var(--greenSoft);color:var(--green)}.b-hold{background:var(--purpleSoft);color:var(--purple)}.b-lose{background:var(--dangerSoft);color:var(--danger)}.b-gray{background:#f0f1f4;color:#626875}
+.products{display:flex;gap:4px;flex-wrap:wrap}.chip{padding:3px 7px;border-radius:6px;background:#f1f3f6;font-size:10px;font-weight:700;color:#59606e}
+.product-memo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:2px}.product-memo-card{border:1px solid var(--line);border-radius:12px;background:#fafbfc;padding:11px}.product-memo-card.hidden{display:none}.product-memo-title{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:850;margin-bottom:8px}.product-memo-title span{font-size:10px;color:var(--muted);font-weight:650}.product-note-view{padding:10px 0;border-bottom:1px solid var(--line)}.product-note-view:last-child{border-bottom:0}.product-note-view b{font-size:12px}.product-note-view p{font-size:13px;white-space:pre-wrap;margin:5px 0 0;color:#424854}
+.empty{padding:52px 20px;text-align:center;color:var(--muted)}
+.progress{height:9px;border-radius:999px;background:#eceff4;overflow:hidden}.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--brand),#ef5a79);border-radius:999px}
+.funnel{display:grid;gap:12px}.funnel-row{display:grid;grid-template-columns:100px 1fr 42px;gap:10px;align-items:center;font-size:12px}.funnel-bar{height:10px;background:#edf0f5;border-radius:999px;overflow:hidden}.funnel-bar span{display:block;height:100%;background:linear-gradient(90deg,#343a46,#7b8497);border-radius:999px}
+.list{display:grid}.list-item{padding:13px 0;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:flex-start}.list-item:last-child{border-bottom:0}.dot{width:9px;height:9px;border-radius:50%;background:var(--brand);margin-top:5px;flex:0 0 auto}.list-title{font-size:13px;font-weight:750}.list-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.section-title{display:flex;align-items:end;justify-content:space-between;margin:4px 0 15px}.section-title h2{font-size:20px;margin:0}.section-title p{font-size:12px;color:var(--muted);margin:4px 0 0}
+.modal-back{position:fixed;inset:0;background:rgba(7,10,15,.56);z-index:80;display:grid;place-items:center;padding:18px}.modal{background:#fff;border-radius:18px;width:min(840px,100%);max-height:92vh;overflow:auto;box-shadow:0 24px 80px rgba(0,0,0,.25)}.modal.narrow{width:min(520px,100%)}.modal.wide{width:min(1120px,100%)}
+.modal-head{position:sticky;top:0;background:#fff;z-index:2;padding:18px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}.modal-head h2{font-size:18px;margin:0}.close{border:0;background:#f1f3f6;width:34px;height:34px;border-radius:10px;font-size:18px}.modal-body{padding:20px}.modal-foot{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:14px 20px;display:flex;justify-content:flex-end;gap:8px}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.field label{display:block;font-size:12px;font-weight:800;margin:0 0 7px}.field.full{grid-column:1/-1}.check-grid{display:flex;gap:7px;flex-wrap:wrap}.check-chip input{display:none}.check-chip label{border:1px solid var(--line);padding:7px 10px;border-radius:9px;font-size:12px;display:block;cursor:pointer}.check-chip input:checked+label{border-color:var(--brand);background:var(--soft);color:var(--brand);font-weight:800}
+.warning{background:var(--amberSoft);color:#7b5206;border:1px solid #f0d48e;border-radius:10px;padding:10px 12px;font-size:12px;margin-top:7px}
+.detail-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px}.info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.info-box{background:#f8f9fb;border:1px solid var(--line);border-radius:11px;padding:11px}.info-box .k{font-size:10px;color:var(--muted)}.info-box .v{font-size:13px;font-weight:750;margin-top:4px;word-break:break-all}
+.timeline{display:grid;gap:12px;margin-top:14px}.timeline-item{border-left:2px solid #e8eaf0;padding-left:13px}.timeline-meta{font-size:10px;color:var(--muted)}.timeline-content{font-size:13px;white-space:pre-wrap;margin-top:4px}.note-form{background:#f8f9fb;border:1px solid var(--line);border-radius:13px;padding:13px;margin-top:14px}
+.setup-screen,.auth-screen{min-height:100vh;background:radial-gradient(circle at top left,#2c303b,#12141b 45%,#0d0f14);display:grid;place-items:center;padding:24px}.setup-card,.auth-card{width:min(720px,100%);background:#fff;border-radius:24px;box-shadow:0 30px 90px rgba(0,0,0,.34);overflow:hidden}.setup-hero{padding:28px 30px;background:linear-gradient(135deg,#171a22,#2a2e39);color:#fff}.setup-hero h1{font-size:27px;margin:0}.setup-hero p{color:#bac0cc;line-height:1.6}.setup-body{padding:26px 30px}.mode-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.mode-card{border:1px solid var(--line);border-radius:15px;padding:17px}.mode-card h3{margin:0}.mode-card p{font-size:12px;color:var(--muted);line-height:1.6;min-height:58px}
+.auth-card{width:min(440px,100%)}.auth-body{padding:30px}.auth-logo{text-align:center;margin-bottom:22px}.auth-logo .logo-mark{margin:0 auto 12px}.tabs{display:flex;background:#f0f2f5;border-radius:10px;padding:3px;margin-bottom:18px}.tabs button{flex:1;border:0;background:transparent;padding:8px;border-radius:8px;font-weight:800;color:var(--muted)}.tabs button.active{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.toast-wrap{position:fixed;right:18px;bottom:18px;z-index:120;display:grid;gap:8px}.toast{background:#1b1e26;color:#fff;padding:11px 14px;border-radius:11px;box-shadow:0 8px 30px rgba(0,0,0,.2);font-size:13px;animation:in .18s ease}.toast.err{background:#a51f35}.toast.ok{background:#176e4e}@keyframes in{from{transform:translateY(8px);opacity:0}}
+.mobile-nav{display:none}
+@media(max-width:1180px){.grid.kpi{grid-template-columns:repeat(3,1fr)}.grid.two{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr}}
+@media(max-width:760px){.product-memo-grid{grid-template-columns:1fr}.app{display:block}.sidebar{display:none}.topbar{height:62px;padding:0 15px}.top-title p{display:none}.content{padding:16px 12px 90px}.grid.kpi{grid-template-columns:repeat(2,1fr)}.grid.three{grid-template-columns:1fr}.form-grid,.mode-grid,.info-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.toolbar{align-items:stretch}.toolbar .spacer{display:none}.search{min-width:100%;width:100%}.toolbar .select{width:calc(50% - 5px)}.user-pill .user-text{display:none}.mobile-nav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;height:68px;background:#fff;border-top:1px solid var(--line);z-index:40}.mobile-nav button{border:0;background:#fff;font-size:10px;color:var(--muted);display:grid;place-items:center}.mobile-nav button.active{color:var(--brand);font-weight:800}.mobile-nav b{font-size:18px;display:block}.setup-body,.setup-hero{padding:22px}.modal-back{padding:0;align-items:end}.modal,.modal.narrow,.modal.wide{border-radius:18px 18px 0 0;max-height:94vh}.table{min-width:920px}}
+</style>
+</head>
+<body>
+<div id="setupScreen" class="setup-screen hidden">
+  <div class="setup-card">
+    <div class="setup-hero">
+      <div class="logo" style="padding:0;border:0"><div class="logo-mark">M×K</div><div><div class="logo-title">메뉴잇 x KT</div><div class="logo-sub">공용 영업 DB · 상담 · 일정 · 실적</div></div></div>
+      <h1 style="margin-top:24px">사용 방식을 선택하세요</h1>
+      <p>현재 PC에서 바로 사용하는 로컬 저장 모드와, 영업사원들이 함께 사용하는 Supabase 공용 모드를 지원합니다.</p>
+    </div>
+    <div class="setup-body">
+      <div class="mode-grid">
+        <div class="mode-card">
+          <h3>지금 바로 사용</h3><p>설치 없이 시작합니다. 입력한 DB는 현재 브라우저에 계속 저장됩니다.</p>
+          <button class="btn dark" style="width:100%" onclick="startDemo()">로컬 저장 모드 시작</button>
+        </div>
+        <div class="mode-card">
+          <h3>공용 DB 연결</h3><p>Supabase를 연결하면 여러 직원이 같은 DB를 실시간으로 조회·수정할 수 있습니다.</p>
+          <button class="btn primary" style="width:100%" onclick="toggleCloudSetup()">공용 DB 연결 설정</button>
+        </div>
+      </div>
+      <div id="cloudSetup" class="hidden" style="margin-top:18px">
+        <div class="field"><label>Supabase Project URL</label><input id="setupUrl" class="input" placeholder="https://xxxxx.supabase.co"></div>
+        <div class="field" style="margin-top:12px"><label>anon public key</label><textarea id="setupKey" class="textarea" rows="4" placeholder="eyJ..."></textarea></div>
+        <div class="warning">먼저 제공된 <b>supabase_schema.sql</b>을 Supabase SQL Editor에서 실행해야 합니다.</div>
+        <button class="btn primary" style="width:100%;margin-top:12px" onclick="saveCloudConfig()">저장 후 로그인 화면 열기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="authScreen" class="auth-screen hidden">
+  <div class="auth-card">
+    <div class="auth-body">
+      <div class="auth-logo"><div class="logo-mark">M×K</div><h2 style="margin:0">메뉴잇 x KT</h2><p class="muted small">공용 계정으로 로그인하세요.</p></div>
+      <div class="tabs"><button id="loginTab" class="active" onclick="setAuthTab('login')">로그인</button><button id="signupTab" onclick="setAuthTab('signup')">회원가입</button></div>
+      <div id="nameField" class="field hidden"><label>이름</label><input id="authName" class="input" placeholder="홍길동"></div>
+      <div class="field" style="margin-top:12px"><label>이메일</label><input id="authEmail" class="input" type="email" placeholder="sales@menuit.co.kr"></div>
+      <div class="field" style="margin-top:12px"><label>비밀번호</label><input id="authPassword" class="input" type="password" placeholder="8자 이상"></div>
+      <button id="authSubmit" class="btn primary" style="width:100%;margin-top:18px" onclick="submitAuth()">로그인</button>
+      <button class="btn ghost" style="width:100%;margin-top:8px" onclick="resetConfig()">연결 설정 다시 하기</button>
+    </div>
+  </div>
+</div>
+
+<div id="app" class="app hidden">
+  <aside class="sidebar">
+    <div class="logo"><div class="logo-mark">M×K</div><div><div class="logo-title">메뉴잇 x KT</div><div class="logo-sub">SALES OPERATIONS</div></div></div>
+    <nav class="nav" id="desktopNav">
+      <button data-view="dashboard" class="active" onclick="navigate('dashboard')">▦ 대시보드</button>
+      <button data-view="leads" onclick="navigate('leads')">☷ 전체 고객 DB <span id="leadCountSide" class="count">0</span></button>
+      <button data-view="mywork" onclick="navigate('mywork')">✓ 내 업무 <span id="myWorkCountSide" class="count">0</span></button>
+      <button data-view="performance" onclick="navigate('performance')">↗ 실적 관리</button>
+      <button data-view="trash" onclick="navigate('trash')">⌫ 휴지통</button>
+    </nav>
+    <div class="side-foot">모든 변경 내용은 수정자와 시간 기준으로 기록됩니다.<br><br><span id="modeLabel">로컬 저장 모드</span></div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div class="top-title"><h1 id="pageTitle">영업 대시보드</h1><p id="pageSubtitle">오늘 처리할 DB와 월 실적을 확인합니다.</p></div>
+      <div class="top-actions">
+        <button class="btn primary" onclick="openLeadModal()">＋ 신규 DB</button>
+        <div class="user-pill"><div class="avatar" id="topAvatar">김</div><div class="user-text"><div style="font-size:12px;font-weight:800" id="topName">김형석</div><div style="font-size:10px;color:var(--muted)" id="topRole">영업팀장</div></div><button class="btn smallBtn" onclick="logout()">로그아웃</button></div>
+      </div>
+    </header>
+    <section class="content" id="viewRoot"></section>
+  </main>
+  <nav class="mobile-nav" id="mobileNav">
+    <button data-view="dashboard" class="active" onclick="navigate('dashboard')"><span><b>▦</b>대시보드</span></button>
+    <button data-view="leads" onclick="navigate('leads')"><span><b>☷</b>전체 DB</span></button>
+    <button data-view="mywork" onclick="navigate('mywork')"><span><b>✓</b>내 업무</span></button>
+    <button data-view="performance" onclick="navigate('performance')"><span><b>↗</b>실적</span></button>
+    <button onclick="openLeadModal()"><span><b>＋</b>신규</span></button>
+  </nav>
+</div>
+
+<div id="modalRoot"></div><div id="toastWrap" class="toast-wrap"></div>
+
+<script>
+const CFG_KEY='menuit_crm_config_v1', DEMO_KEY='menuit_crm_data_v2';
+const STATUS=['신규 DB','1차 통화','상담 중','견적 발송','재통화 예정','계약 대기','접수 완료','설치·개통','완료','부재','장기보류','중복 DB','계약 실패','취소'];
+const PRODUCTS=['인터넷','TV','전화','모바일','GiGAeyes','AI전화','우리동네','제휴카드','KT구독','메뉴잇','기타'];
+const SUPPORT_FLAGS=['기본 지원금','별도 사은품','위약금 지원','현금 지원 요청','기타 지원'];
+const CHANNELS=['당근','태블릿','전화','방문','기존고객','지인','홈페이지','기타'];
+const CARRIERS=['KT','SK','LG','지역케이블','기타','미확인'];
+let mode='demo', sb=null, currentUser=null, currentProfile=null, currentView='dashboard', authTab='login';
+let leads=[], profiles=[], notes=[], activities=[];
+let filters={query:'',status:'',source_type:'',assigned_to:'',product:''};
+
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const digits=s=>String(s||'').replace(/\D/g,'');
+const money=n=>Number(n||0).toLocaleString('ko-KR');
+const offeredSupport=l=>Number(l.standard_support_amount||0)+Number(l.additional_gift_amount||0)+Number(l.penalty_support_amount||0);
+const supportLabel=l=>{const flags=l.support_flags||[];return flags.length?flags.join(', '):'없음'};
+const dateOnly=v=>v?new Date(v).toLocaleDateString('ko-KR'):'-';
+const dateTime=v=>v?new Date(v).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'-';
+const isoLocal=v=>v?new Date(v).toISOString():null;
+const initials=n=>(n||'영').trim().slice(0,1);
+const roleName=r=>({admin:'관리자',team_lead:'영업팀장',sales:'영업사원'}[r]||r);
+function toast(msg,type='ok'){const d=document.createElement('div');d.className='toast '+(type==='err'?'err':'ok');d.textContent=msg;$('#toastWrap').appendChild(d);setTimeout(()=>d.remove(),2800)}
+function statusClass(s){if(['완료','설치·개통','접수 완료'].includes(s))return'b-win';if(['계약 실패','취소','중복 DB'].includes(s))return'b-lose';if(['장기보류','부재'].includes(s))return'b-hold';if(['신규 DB'].includes(s))return'b-new';if(['1차 통화','상담 중','견적 발송','재통화 예정','계약 대기'].includes(s))return'b-active';return'b-gray'}
+function profileName(id){return profiles.find(p=>p.id===id)?.display_name||'미배정'}
+function isManager(){return ['admin','team_lead'].includes(currentProfile?.role)}
+function nowISO(){return new Date().toISOString()}
+function uuid(){if(globalThis.crypto&&typeof globalThis.crypto.randomUUID==='function')return globalThis.crypto.randomUUID();return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0,v=c==='x'?r:(r&3|8);return v.toString(16)})}
+function monthStart(){const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)}
+function overdue(l){return l.next_follow_up_at && new Date(l.next_follow_up_at)<new Date() && !['완료','취소','계약 실패'].includes(l.status)}
+function leadCode(l){const d=new Date(l.created_at||Date.now());return `M-${String(d.getFullYear()).slice(2)}${String(d.getMonth()+1).padStart(2,'0')}-${String(l.lead_no||l.id?.slice(0,4)||'0001').padStart(4,'0')}`}
+
+async function boot(){
+  const cfg=JSON.parse(localStorage.getItem(CFG_KEY)||'null');
+  if(!cfg){$('#setupScreen').classList.remove('hidden');return}
+  if(cfg.mode==='demo'){mode='demo';await initDemo();return}
+  mode='cloud';
+  try{sb=window.supabase.createClient(cfg.url,cfg.key);const {data}=await sb.auth.getSession();if(data.session){currentUser=data.session.user;await initCloudApp()}else $('#authScreen').classList.remove('hidden')}catch(e){toast('Supabase 연결에 실패했습니다.','err');resetConfig()}
+}
+function toggleCloudSetup(){$('#cloudSetup').classList.toggle('hidden')}
+function startDemo(){localStorage.setItem(CFG_KEY,JSON.stringify({mode:'demo'}));initDemo()}
+function saveCloudConfig(){const url=$('#setupUrl').value.trim(),key=$('#setupKey').value.trim();if(!url||!key)return toast('Project URL과 anon key를 입력하세요.','err');localStorage.setItem(CFG_KEY,JSON.stringify({mode:'cloud',url,key}));location.reload()}
+function resetConfig(){localStorage.removeItem(CFG_KEY);location.reload()}
+function setAuthTab(t){authTab=t;$('#loginTab').classList.toggle('active',t==='login');$('#signupTab').classList.toggle('active',t==='signup');$('#nameField').classList.toggle('hidden',t!=='signup');$('#authSubmit').textContent=t==='login'?'로그인':'회원가입'}
+async function submitAuth(){
+  const email=$('#authEmail').value.trim(),password=$('#authPassword').value,name=$('#authName').value.trim();
+  if(!email||!password)return toast('이메일과 비밀번호를 입력하세요.','err');
+  let res;
+  if(authTab==='login')res=await sb.auth.signInWithPassword({email,password});
+  else res=await sb.auth.signUp({email,password,options:{data:{display_name:name||email.split('@')[0]}}});
+  if(res.error)return toast(res.error.message,'err');
+  if(authTab==='signup'&&!res.data.session)return toast('가입 완료. 이메일 인증 후 로그인하세요.');
+  currentUser=res.data.user;await initCloudApp();
+}
+async function logout(){if(mode==='cloud')await sb.auth.signOut();currentUser=null;currentProfile=null;location.reload()}
+
+function demoSeed(){
+  const p1={id:'u1',display_name:'김형석',role:'team_lead',team:'영업팀',is_active:true};
+  const base=new Date(); const plus=(d,h=10)=>{const x=new Date(base);x.setDate(x.getDate()+d);x.setHours(h,0,0,0);return x.toISOString()};
+  return {profiles:[p1],leads:[
+    {id:'l1',lead_no:1,source_type:'인바운드',source_channel:'당근',customer_type:'일반 소비자',business_name:'',customer_name:'첫 번째 상담 고객',phone:'연락처 입력 필요',region:'',interested_products:['인터넷','TV','전화'],product_notes:{'인터넷':'1기가 또는 500메가 검토','TV':'TV 2대 필요','전화':'전화 필요'},current_carrier:null,contract_end_date:null,assigned_to:'u1',status:'1차 통화',next_follow_up_at:null,last_contact_at:plus(0,10),expected_value:0,support_flags:[],standard_support_amount:0,additional_gift_amount:0,penalty_support_amount:0,cash_support_request_amount:0,support_memo:'',memo:'인터넷 1기가 또는 500메가, 전화 필요, TV 2대.',created_by:'u1',updated_by:'u1',created_at:plus(0,10),updated_at:plus(0,10),deleted_at:null}
+  ],notes:[
+    {id:'n1',lead_id:'l1',content:'1차 상담: 인터넷 1기가 또는 500메가 검토 / 전화 필요 / TV 2대 필요.',follow_up_at:null,created_by:'u1',created_at:plus(0,10)}
+  ],activities:[]};
+}
+function normalizeLead(l){return {...l,support_flags:Array.isArray(l.support_flags)?l.support_flags:[],standard_support_amount:Number(l.standard_support_amount||0),additional_gift_amount:Number(l.additional_gift_amount||0),penalty_support_amount:Number(l.penalty_support_amount||0),cash_support_request_amount:Number(l.cash_support_request_amount||0),support_memo:l.support_memo||''}}
+async function initDemo(){
+  mode='demo';currentUser={id:'u1',email:'demo@menuit.local'};
+  let data=JSON.parse(localStorage.getItem(DEMO_KEY)||'null');if(!data){data=demoSeed();localStorage.setItem(DEMO_KEY,JSON.stringify(data))}
+  profiles=data.profiles;leads=(data.leads||[]).map(normalizeLead);notes=data.notes||[];activities=data.activities||[];currentProfile=profiles[0];
+  saveDemo();showApp();
+}
+function saveDemo(){localStorage.setItem(DEMO_KEY,JSON.stringify({profiles,leads,notes,activities}))}
+async function initCloudApp(){
+  const {data:p,error}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();if(error)return toast('프로필을 불러오지 못했습니다: '+error.message,'err');currentProfile=p;await loadCloud();
+  sb.channel('crm-live').on('postgres_changes',{event:'*',schema:'public',table:'leads'},()=>refresh()).on('postgres_changes',{event:'*',schema:'public',table:'lead_notes'},()=>refresh()).subscribe();showApp();
+}
+async function loadCloud(){
+  const [a,b,c,d]=await Promise.all([sb.from('profiles').select('*').eq('is_active',true).order('display_name'),sb.from('leads').select('*').order('updated_at',{ascending:false}),sb.from('lead_notes').select('*').order('created_at',{ascending:false}),sb.from('activities').select('*').order('created_at',{ascending:false}).limit(500)]);
+  if(a.error||b.error||c.error)return toast('데이터 로딩 오류','err');profiles=a.data;leads=(b.data||[]).map(normalizeLead);notes=c.data;activities=d.data||[];
+}
+async function refresh(){if(mode==='cloud')await loadCloud();renderCurrent()}
+function showApp(){
+  $('#setupScreen').classList.add('hidden');$('#authScreen').classList.add('hidden');$('#app').classList.remove('hidden');
+  $('#topName').textContent=currentProfile.display_name;$('#topRole').textContent=roleName(currentProfile.role);$('#topAvatar').textContent=initials(currentProfile.display_name);$('#modeLabel').textContent=mode==='cloud'?'공용 Supabase 모드':'로컬 저장 모드 · 현재 브라우저 저장';navigate('dashboard');
+}
+
+function navigate(v){currentView=v;$$('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===v));const meta={dashboard:['영업 대시보드','오늘 처리할 DB와 월 실적을 확인합니다.'],leads:['전체 고객 DB','인바운드와 아웃바운드 영업 DB를 통합 관리합니다.'],mywork:['내 업무','내 담당 고객의 오늘 일정과 기한 초과 건을 확인합니다.'],performance:['실적 관리','영업사원별 진행 건수와 전환 실적을 확인합니다.'],trash:['휴지통','삭제된 DB를 확인하고 복원합니다.']}[v];$('#pageTitle').textContent=meta[0];$('#pageSubtitle').textContent=meta[1];renderCurrent()}
+function renderCurrent(){updateSideCounts();({dashboard:renderDashboard,leads:()=>renderLeadList(false),mywork:renderMyWork,performance:renderPerformance,trash:()=>renderLeadList(true)})[currentView]()}
+function activeLeads(){return leads.filter(l=>!l.deleted_at)}
+function updateSideCounts(){const a=activeLeads();$('#leadCountSide').textContent=a.length;$('#myWorkCountSide').textContent=a.filter(l=>l.assigned_to===currentProfile.id&&(overdue(l)||isToday(l.next_follow_up_at))).length}
+function isToday(v){if(!v)return false;const a=new Date(v),b=new Date();return a.toDateString()===b.toDateString()}
+
+function renderDashboard(){
+  const a=activeLeads(),newCount=a.filter(l=>l.status==='신규 DB').length,active=a.filter(l=>['1차 통화','상담 중','견적 발송','재통화 예정','계약 대기'].includes(l.status)).length,over=a.filter(overdue).length,done=a.filter(l=>l.status==='완료').length;
+  const monthDone=a.filter(l=>l.status==='완료'&&new Date(l.updated_at)>=monthStart());const internet=monthDone.filter(l=>(l.interested_products||[]).includes('인터넷')).length;const rate=Math.min(100,Math.round(internet/30*100));
+  const recent=[...a].filter(l=>l.next_follow_up_at).sort((x,y)=>new Date(x.next_follow_up_at)-new Date(y.next_follow_up_at)).slice(0,6);
+  const stages=['신규 DB','1차 통화','상담 중','견적 발송','계약 대기','접수 완료','완료'];const max=Math.max(1,...stages.map(s=>a.filter(l=>l.status===s).length));
+  $('#viewRoot').innerHTML=`
+    <div class="grid kpi">
+      ${kpi('신규 인입 DB',newCount,'확인 전 신규 건','')}${kpi('상담 진행 중',active,'현재 영업 진행','')}${kpi('오늘 재통화',a.filter(l=>isToday(l.next_follow_up_at)).length,'오늘 일정','')}${kpi('기한 초과',over,'즉시 확인 필요','alert')}${kpi('이번 달 완료',monthDone.length,'완료 처리 건','')}${kpi('인터넷 실적',internet,'목표 30건','')}
+    </div>
+    <div class="grid two" style="margin-top:14px">
+      <div class="card"><div class="card-head"><h3>월 인터넷 목표</h3><span class="badge b-new">${rate}%</span></div><div class="card-pad"><div style="display:flex;justify-content:space-between;align-items:end"><div><div class="muted small">현재 실적</div><div style="font-size:34px;font-weight:900">${internet}<span style="font-size:16px;color:var(--muted)"> / 30건</span></div></div><div style="font-size:13px;font-weight:800;color:${internet>=30?'var(--green)':'var(--brand)'}">${internet>=30?'목표 달성':'남은 '+Math.max(0,30-internet)+'건'}</div></div><div class="progress" style="margin-top:14px"><span style="width:${rate}%"></span></div><p class="muted small" style="margin-bottom:0">설치·개통 후 ‘완료’ 상태로 변경한 인터넷 포함 DB 기준입니다.</p></div></div>
+      <div class="card"><div class="card-head"><h3>재통화·일정</h3><button class="btn smallBtn" onclick="navigate('mywork')">전체 보기</button></div><div class="card-pad list">${recent.length?recent.map(l=>`<div class="list-item" onclick="openLeadDetail('${l.id}')" style="cursor:pointer"><div class="dot" style="background:${overdue(l)?'var(--brand)':'var(--blue)'}"></div><div><div class="list-title">${esc(l.business_name||l.customer_name)} · ${esc(profileName(l.assigned_to))}</div><div class="list-sub">${dateTime(l.next_follow_up_at)} · ${esc(l.status)}</div></div></div>`).join(''):'<div class="empty">예정된 일정이 없습니다.</div>'}</div></div>
+    </div>
+    <div class="grid two" style="margin-top:14px">
+      <div class="card"><div class="card-head"><h3>영업 단계 현황</h3></div><div class="card-pad funnel">${stages.map(s=>{const n=a.filter(l=>l.status===s).length;return `<div class="funnel-row"><span>${s}</span><div class="funnel-bar"><span style="width:${n/max*100}%"></span></div><b>${n}</b></div>`}).join('')}</div></div>
+      <div class="card"><div class="card-head"><h3>최근 수정 DB</h3></div><div class="table-wrap"><table class="table" style="min-width:650px"><thead><tr><th>고객</th><th>상태</th><th>담당자</th><th>수정일</th></tr></thead><tbody>${[...a].sort((x,y)=>new Date(y.updated_at)-new Date(x.updated_at)).slice(0,7).map(l=>`<tr class="clickable" onclick="openLeadDetail('${l.id}')"><td><b>${esc(l.business_name||l.customer_name)}</b><div class="small muted">${esc(l.phone)}</div></td><td><span class="badge ${statusClass(l.status)}">${esc(l.status)}</span></td><td>${esc(profileName(l.assigned_to))}</td><td>${dateTime(l.updated_at)}</td></tr>`).join('')}</tbody></table></div></div>
+    </div>`;
+}
+function kpi(label,value,foot,cls){return `<div class="card kpi-card ${cls}"><div class="kpi-label">${label}</div><div class="kpi-value">${value}</div><div class="kpi-foot">${foot}</div></div>`}
+
+function filteredLeads(trash=false){
+  let arr=leads.filter(l=>trash?!!l.deleted_at:!l.deleted_at);
+  const q=filters.query.toLowerCase();if(q)arr=arr.filter(l=>[l.customer_name,l.business_name,l.phone,l.region,l.memo,l.support_memo,(l.support_flags||[]).join(' '),Object.values(l.product_notes||{}).join(' ')].some(v=>String(v||'').toLowerCase().includes(q)));
+  if(filters.status)arr=arr.filter(l=>l.status===filters.status);if(filters.source_type)arr=arr.filter(l=>l.source_type===filters.source_type);if(filters.assigned_to)arr=arr.filter(l=>l.assigned_to===filters.assigned_to);if(filters.product)arr=arr.filter(l=>(l.interested_products||[]).includes(filters.product));return arr.sort((x,y)=>new Date(y.updated_at)-new Date(x.updated_at));
+}
+function renderLeadList(trash=false){
+  const arr=filteredLeads(trash);$('#viewRoot').innerHTML=`
+  <div class="section-title"><div><h2>${trash?'삭제된 DB':'고객 DB 목록'}</h2><p>총 ${arr.length}건</p></div>${trash?'':'<div><button class="btn" onclick="document.getElementById(\'csvFile\').click()">CSV 가져오기</button> <button class="btn" onclick="exportCSV()">CSV 내보내기</button><input id="csvFile" class="hidden" type="file" accept=".csv" onchange="importCSV(this.files[0])"></div>'}</div>
+  <div class="card"><div class="card-pad"><div class="toolbar"><div class="search"><span>⌕</span><input class="input" placeholder="고객명, 상호명, 연락처 검색" value="${esc(filters.query)}" oninput="filters.query=this.value;renderCurrent()"></div>
+  <select class="select" style="width:auto" onchange="filters.status=this.value;renderCurrent()"><option value="">전체 상태</option>${STATUS.map(s=>`<option ${filters.status===s?'selected':''}>${s}</option>`).join('')}</select>
+  <select class="select" style="width:auto" onchange="filters.source_type=this.value;renderCurrent()"><option value="">전체 유입</option><option ${filters.source_type==='인바운드'?'selected':''}>인바운드</option><option ${filters.source_type==='아웃바운드'?'selected':''}>아웃바운드</option></select>
+  <select class="select" style="width:auto" onchange="filters.assigned_to=this.value;renderCurrent()"><option value="">전체 담당자</option>${profiles.map(p=>`<option value="${p.id}" ${filters.assigned_to===p.id?'selected':''}>${esc(p.display_name)}</option>`).join('')}</select>
+  <select class="select" style="width:auto" onchange="filters.product=this.value;renderCurrent()"><option value="">전체 상품</option>${PRODUCTS.map(p=>`<option ${filters.product===p?'selected':''}>${p}</option>`).join('')}</select>
+  <div class="spacer"></div><button class="btn primary" onclick="openLeadModal()">＋ 신규 DB</button></div></div>
+  <div class="table-wrap"><table class="table"><thead><tr><th>DB번호</th><th>고객/상호</th><th>연락처</th><th>유입</th><th>관심 상품</th><th>지원/요청</th><th>진행 상태</th><th>담당자</th><th>다음 연락</th><th>최근 수정</th><th></th></tr></thead><tbody>${arr.length?arr.map(l=>leadRow(l,trash)).join(''):`<tr><td colspan="11"><div class="empty">표시할 DB가 없습니다.</div></td></tr>`}</tbody></table></div></div>`;
+}
+function leadRow(l,trash){const support=(l.support_flags||[]),offered=offeredSupport(l),requested=Number(l.cash_support_request_amount||0);return `<tr class="clickable" onclick="openLeadDetail('${l.id}')"><td>${leadCode(l)}</td><td><b>${esc(l.business_name||l.customer_name)}</b><div class="small muted">${l.business_name?esc(l.customer_name)+' · ':''}${esc(l.customer_type)}</div></td><td>${esc(l.phone)}</td><td><span class="badge b-gray">${esc(l.source_type)}</span><div class="small muted">${esc(l.source_channel)}</div></td><td><div class="products">${(l.interested_products||[]).slice(0,3).map(p=>`<span class="chip">${esc(p)}</span>`).join('')}${(l.interested_products||[]).length>3?`<span class="chip">+${l.interested_products.length-3}</span>`:''}</div></td><td>${(support.length||offered||requested)?`<div class="products">${support.slice(0,2).map(x=>`<span class="chip">${esc(x)}</span>`).join('')}${support.length>2?`<span class="chip">+${support.length-2}</span>`:''}</div><div class="small muted">${offered?'제공 '+money(offered)+'원':''}${offered&&requested?' · ':''}${requested?'요청 '+money(requested)+'원':''}</div>`:'<span class="muted">-</span>'}</td><td><span class="badge ${statusClass(l.status)}">${esc(l.status)}</span></td><td>${esc(profileName(l.assigned_to))}</td><td class="${overdue(l)?'':'muted'}">${l.next_follow_up_at?(overdue(l)?'<b style="color:var(--brand)">기한초과</b><div class="small">'+dateTime(l.next_follow_up_at)+'</div>':dateTime(l.next_follow_up_at)):'-'}</td><td>${dateTime(l.updated_at)}</td><td>${trash&&isManager()?`<button class="btn smallBtn" onclick="event.stopPropagation();restoreLead('${l.id}')">복원</button>`:''}</td></tr>`}
+
+
+function renderMyWork(){
+  const mine=activeLeads().filter(l=>l.assigned_to===currentProfile.id);const today=mine.filter(l=>isToday(l.next_follow_up_at));const late=mine.filter(overdue);const newOnes=mine.filter(l=>l.status==='신규 DB');const contract=mine.filter(l=>['계약 대기','접수 완료','설치·개통'].includes(l.status));
+  $('#viewRoot').innerHTML=`<div class="grid kpi">${kpi('오늘 연락',today.length,'오늘 일정','')}${kpi('기한 초과',late.length,'즉시 처리','alert')}${kpi('신규 배정',newOnes.length,'확인 전 DB','')}${kpi('계약·설치',contract.length,'진행 중','')}</div>
+  <div class="grid two" style="margin-top:14px"><div class="card"><div class="card-head"><h3>기한 초과</h3><span class="badge b-lose">${late.length}건</span></div><div class="table-wrap"><table class="table" style="min-width:700px"><thead><tr><th>고객</th><th>상태</th><th>연락 예정</th><th>연락처</th></tr></thead><tbody>${late.length?late.map(l=>`<tr class="clickable" onclick="openLeadDetail('${l.id}')"><td><b>${esc(l.business_name||l.customer_name)}</b></td><td><span class="badge ${statusClass(l.status)}">${l.status}</span></td><td style="color:var(--brand);font-weight:800">${dateTime(l.next_follow_up_at)}</td><td>${esc(l.phone)}</td></tr>`).join(''):'<tr><td colspan="4"><div class="empty">기한 초과 건이 없습니다.</div></td></tr>'}</tbody></table></div></div>
+  <div class="card"><div class="card-head"><h3>오늘 일정</h3><span class="badge b-new">${today.length}건</span></div><div class="list card-pad">${today.length?today.sort((a,b)=>new Date(a.next_follow_up_at)-new Date(b.next_follow_up_at)).map(l=>`<div class="list-item" onclick="openLeadDetail('${l.id}')" style="cursor:pointer"><div class="dot"></div><div><div class="list-title">${esc(l.business_name||l.customer_name)} · ${esc(l.phone)}</div><div class="list-sub">${dateTime(l.next_follow_up_at)} · ${esc(l.status)}</div></div></div>`).join(''):'<div class="empty">오늘 예정된 연락이 없습니다.</div>'}</div></div></div>
+  <div class="card" style="margin-top:14px"><div class="card-head"><h3>내 담당 전체 DB</h3></div><div class="table-wrap"><table class="table"><thead><tr><th>고객</th><th>유입</th><th>상품</th><th>상태</th><th>다음 연락</th><th>최근 수정</th></tr></thead><tbody>${mine.map(l=>`<tr class="clickable" onclick="openLeadDetail('${l.id}')"><td><b>${esc(l.business_name||l.customer_name)}</b><div class="small muted">${esc(l.phone)}</div></td><td>${esc(l.source_type)} · ${esc(l.source_channel)}</td><td>${(l.interested_products||[]).join(', ')}</td><td><span class="badge ${statusClass(l.status)}">${esc(l.status)}</span></td><td>${dateTime(l.next_follow_up_at)}</td><td>${dateTime(l.updated_at)}</td></tr>`).join('')}</tbody></table></div></div>`;
+}
+function renderPerformance(){
+  const a=activeLeads();const rows=profiles.map(p=>{const mine=a.filter(l=>l.assigned_to===p.id),done=mine.filter(l=>l.status==='완료'),active=mine.filter(l=>!['완료','취소','계약 실패','중복 DB'].includes(l.status)),value=done.reduce((s,l)=>s+Number(l.expected_value||0),0);return {p,total:mine.length,active:active.length,done:done.length,rate:mine.length?Math.round(done.length/mine.length*100):0,value}}).sort((x,y)=>y.done-x.done);
+  const totalDone=rows.reduce((s,r)=>s+r.done,0),internet=a.filter(l=>l.status==='완료'&&new Date(l.updated_at)>=monthStart()&&(l.interested_products||[]).includes('인터넷')).length;
+  $('#viewRoot').innerHTML=`<div class="grid kpi">${kpi('전체 담당 DB',a.length,'활성 DB 기준','')}${kpi('이번 달 완료',a.filter(l=>l.status==='완료'&&new Date(l.updated_at)>=monthStart()).length,'전 직원 합계','')}${kpi('인터넷 완료',internet,'월 목표 30건','')}${kpi('전체 누적 완료',totalDone,'현재 DB 기준','')}</div>
+  <div class="card" style="margin-top:14px"><div class="card-head"><h3>영업사원별 실적</h3><span class="muted small">완료 상태 기준</span></div><div class="table-wrap"><table class="table" style="min-width:850px"><thead><tr><th>영업사원</th><th>소속</th><th>전체 DB</th><th>진행 중</th><th>완료</th><th>전환율</th><th>예상 매출</th><th>목표 기여</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${esc(r.p.display_name)}</b><div class="small muted">${roleName(r.p.role)}</div></td><td>${esc(r.p.team||'-')}</td><td>${r.total}</td><td>${r.active}</td><td><b>${r.done}</b></td><td><span class="badge ${r.rate>=30?'b-win':'b-gray'}">${r.rate}%</span></td><td>${money(r.value)}원</td><td><div class="progress" style="width:150px"><span style="width:${Math.min(100,r.done/10*100)}%"></span></div></td></tr>`).join('')}</tbody></table></div></div>`;
+}
+
+function leadForm(l={}){const selected=l.interested_products||[],productNotes=l.product_notes||{},supportFlags=l.support_flags||[];return `<form id="leadForm" onsubmit="event.preventDefault();saveLead('${l.id||''}')"><div class="form-grid">
+  <div class="field"><label>유입 구분 *</label><select name="source_type" class="select"><option ${l.source_type==='인바운드'?'selected':''}>인바운드</option><option ${l.source_type==='아웃바운드'?'selected':''}>아웃바운드</option></select></div>
+  <div class="field"><label>유입 경로 *</label><select name="source_channel" class="select">${CHANNELS.map(x=>`<option ${l.source_channel===x?'selected':''}>${x}</option>`).join('')}</select></div>
+  <div class="field"><label>고객 유형 *</label><select name="customer_type" class="select"><option ${l.customer_type==='매장 사장님'?'selected':''}>매장 사장님</option><option ${l.customer_type==='일반 소비자'?'selected':''}>일반 소비자</option></select></div>
+  <div class="field"><label>상호명</label><input name="business_name" class="input" value="${esc(l.business_name||'')}" placeholder="매장 고객일 경우"></div>
+  <div class="field"><label>고객명 *</label><input name="customer_name" class="input" value="${esc(l.customer_name||'')}" required></div>
+  <div class="field"><label>연락처 *</label><input name="phone" class="input" value="${esc(l.phone||'')}" required oninput="checkDuplicate(this.value,'${l.id||''}')"><div id="dupWarning"></div></div>
+  <div class="field"><label>지역</label><input name="region" class="input" value="${esc(l.region||'')}" placeholder="예: 부산 부산진구"></div>
+  <div class="field"><label>현재 통신사</label><select name="current_carrier" class="select"><option value="">선택</option>${CARRIERS.map(x=>`<option ${l.current_carrier===x?'selected':''}>${x}</option>`).join('')}</select></div>
+  <div class="field full"><label>관심 상품</label><div class="check-grid">${PRODUCTS.map((p,i)=>`<div class="check-chip"><input id="prod_${i}" name="products" type="checkbox" value="${p}" ${selected.includes(p)?'checked':''} onchange="toggleProductMemo(${i},this.checked)"><label for="prod_${i}">${p}</label></div>`).join('')}</div></div>
+  <div class="field full"><label>상품별 메모</label><div class="product-memo-grid">${PRODUCTS.map((p,i)=>`<div id="productMemoBox_${i}" class="product-memo-card ${selected.includes(p)?'':'hidden'}"><div class="product-memo-title">${p}<span>상품별 상담 내용</span></div><textarea name="product_note_${i}" class="textarea" rows="3" placeholder="${p} 관련 요금제, 수량, 고객 요청사항 등을 입력하세요.">${esc(productNotes[p]||'')}</textarea></div>`).join('')}</div></div>
+  <div class="field full"><label>지원·사은품 항목</label><div class="check-grid">${SUPPORT_FLAGS.map((x,i)=>`<div class="check-chip"><input id="support_${i}" name="support_flags" type="checkbox" value="${x}" ${supportFlags.includes(x)?'checked':''}><label for="support_${i}">${x}</label></div>`).join('')}</div><div class="small muted" style="margin-top:7px">금액이 아직 정해지지 않아도 필요한 항목만 먼저 체크할 수 있습니다.</div></div>
+  <div class="field"><label>기본 지원금</label><input name="standard_support_amount" class="input" type="number" min="0" step="10000" value="${l.standard_support_amount||0}" placeholder="0"></div>
+  <div class="field"><label>별도 사은품 금액</label><input name="additional_gift_amount" class="input" type="number" min="0" step="10000" value="${l.additional_gift_amount||0}" placeholder="0"></div>
+  <div class="field"><label>위약금 지원 예정액</label><input name="penalty_support_amount" class="input" type="number" min="0" step="10000" value="${l.penalty_support_amount||0}" placeholder="0"></div>
+  <div class="field"><label>현금 지원 요청액</label><input name="cash_support_request_amount" class="input" type="number" min="0" step="10000" value="${l.cash_support_request_amount||0}" placeholder="0"></div>
+  <div class="field full"><label>지원 관련 메모</label><textarea name="support_memo" class="textarea" rows="3" placeholder="예: LG 위약금 확인 후 지원 여부 결정 / 현금 30만원 요청 / 사은품 품목 협의 중">${esc(l.support_memo||'')}</textarea></div>
+  <div class="field"><label>약정 만료일</label><input name="contract_end_date" class="input" type="date" value="${l.contract_end_date||''}"></div>
+  <div class="field"><label>담당 영업사원</label><select name="assigned_to" class="select"><option value="">미배정</option>${profiles.map(p=>`<option value="${p.id}" ${(l.assigned_to||currentProfile.id)===p.id?'selected':''}>${esc(p.display_name)}</option>`).join('')}</select></div>
+  <div class="field"><label>진행 상태</label><select name="status" class="select">${STATUS.map(x=>`<option ${l.status===x?'selected':''}>${x}</option>`).join('')}</select></div>
+  <div class="field"><label>다음 연락일</label><input name="next_follow_up_at" class="input" type="datetime-local" value="${l.next_follow_up_at?toInputDate(l.next_follow_up_at):''}"></div>
+  <div class="field"><label>예상 금액</label><input name="expected_value" class="input" type="number" step="10000" value="${l.expected_value||0}"></div>
+  <div class="field"><label>실패 사유</label><input name="failure_reason" class="input" value="${esc(l.failure_reason||'')}"></div>
+  <div class="field full"><label>전체 상담 요약</label><textarea name="memo" class="textarea" rows="4" placeholder="상품 공통 내용이나 전체 상담 요약을 입력하세요.">${esc(l.memo||'')}</textarea></div>
+  </div></form>`}
+function toggleProductMemo(i,checked){const box=document.getElementById(`productMemoBox_${i}`);if(box)box.classList.toggle('hidden',!checked)}
+function openLeadModal(id=''){const l=leads.find(x=>x.id===id)||{};$('#modalRoot').innerHTML=`<div class="modal-back" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><div class="modal-head"><h2>${id?'고객 DB 수정':'신규 고객 DB 등록'}</h2><button class="close" onclick="closeModal()">×</button></div><div class="modal-body">${leadForm(l)}</div><div class="modal-foot"><button class="btn" onclick="closeModal()">취소</button><button class="btn primary" onclick="document.getElementById('leadForm').requestSubmit()">저장</button></div></div></div>`}
+function toInputDate(v){const d=new Date(v);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)}
+function closeModal(e){if(e&&e.target!==e.currentTarget)return;$('#modalRoot').innerHTML=''}
+function checkDuplicate(phone,id){const d=digits(phone);const dup=activeLeads().filter(l=>l.id!==id&&digits(l.phone)===d&&d.length>=8);$('#dupWarning').innerHTML=dup.length?`<div class="warning">동일 연락처 DB ${dup.length}건이 있습니다: ${dup.map(x=>esc(x.business_name||x.customer_name)).join(', ')}</div>`:''}
+function formDataObj(form){
+  const f=new FormData(form),selected=f.getAll('products'),support_flags=f.getAll('support_flags'),product_notes={};
+  PRODUCTS.forEach((p,i)=>{if(selected.includes(p)){const v=(f.get(`product_note_${i}`)||'').trim();if(v)product_notes[p]=v}});
+  const standard_support_amount=Number(f.get('standard_support_amount')||0),additional_gift_amount=Number(f.get('additional_gift_amount')||0),penalty_support_amount=Number(f.get('penalty_support_amount')||0),cash_support_request_amount=Number(f.get('cash_support_request_amount')||0);
+  [['기본 지원금',standard_support_amount],['별도 사은품',additional_gift_amount],['위약금 지원',penalty_support_amount],['현금 지원 요청',cash_support_request_amount]].forEach(([name,value])=>{if(value>0&&!support_flags.includes(name))support_flags.push(name)});
+  return {source_type:f.get('source_type'),source_channel:f.get('source_channel'),customer_type:f.get('customer_type'),business_name:f.get('business_name').trim(),customer_name:f.get('customer_name').trim(),phone:f.get('phone').trim(),region:f.get('region').trim(),interested_products:selected,product_notes,support_flags,standard_support_amount,additional_gift_amount,penalty_support_amount,cash_support_request_amount,support_memo:(f.get('support_memo')||'').trim()||null,current_carrier:f.get('current_carrier')||null,contract_end_date:f.get('contract_end_date')||null,assigned_to:f.get('assigned_to')||null,status:f.get('status'),next_follow_up_at:f.get('next_follow_up_at')?isoLocal(f.get('next_follow_up_at')):null,expected_value:Number(f.get('expected_value')||0),failure_reason:f.get('failure_reason').trim()||null,memo:f.get('memo').trim()||null,updated_by:currentProfile.id,updated_at:nowISO()}
+}
+async function saveLead(id){
+  const data=formDataObj($('#leadForm'));if(!data.customer_name||!data.phone)return toast('고객명과 연락처는 필수입니다.','err');
+  if(id){const old=leads.find(l=>l.id===id);if(mode==='demo'){Object.assign(old,data);activities.unshift({id:uuid(),lead_id:id,action:'수정',detail:{status:data.status},user_id:currentProfile.id,created_at:nowISO()});saveDemo()}else{const r=await sb.from('leads').update(data).eq('id',id);if(r.error)return toast(r.error.message,'err');await logActivity(id,'수정',{status:data.status})}}
+  else{data.created_by=currentProfile.id;data.created_at=nowISO();if(mode==='demo'){data.id=uuid();data.lead_no=Math.max(0,...leads.map(l=>Number(l.lead_no)||0))+1;data.deleted_at=null;leads.unshift(data);activities.unshift({id:uuid(),lead_id:data.id,action:'등록',detail:{},user_id:currentProfile.id,created_at:nowISO()});saveDemo()}else{const r=await sb.from('leads').insert(data).select().single();if(r.error)return toast(r.error.message,'err');await logActivity(r.data.id,'등록',{})}}
+  closeModal();toast(id?'DB가 수정되었습니다.':'신규 DB가 등록되었습니다.');await refresh();
+}
+async function logActivity(lead_id,action,detail){if(mode==='demo')return;await sb.from('activities').insert({lead_id,action,detail,user_id:currentProfile.id})}
+
+function openLeadDetail(id){const l=leads.find(x=>x.id===id);if(!l)return;const ns=notes.filter(n=>n.lead_id===id).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));const acts=activities.filter(a=>a.lead_id===id).slice(0,20),flags=l.support_flags||[],offered=offeredSupport(l),requested=Number(l.cash_support_request_amount||0);$('#modalRoot').innerHTML=`<div class="modal-back" onclick="closeModal(event)"><div class="modal wide" onclick="event.stopPropagation()"><div class="modal-head"><div><h2>${esc(l.business_name||l.customer_name)}</h2><div class="small muted">${leadCode(l)} · 최근 수정 ${dateTime(l.updated_at)}</div></div><div style="display:flex;gap:7px"><button class="btn smallBtn" onclick="openLeadModal('${l.id}')">수정</button>${!l.deleted_at&&isManager()?`<button class="btn danger smallBtn" onclick="softDeleteLead('${l.id}')">휴지통</button>`:''}<button class="close" onclick="closeModal()">×</button></div></div><div class="modal-body"><div class="detail-grid">
+  <div><div class="info-grid">${info('고객명',l.customer_name)}${info('상호명',l.business_name||'-')}${info('연락처',l.phone)}${info('지역',l.region||'-')}${info('유입',`${l.source_type} · ${l.source_channel}`)}${info('고객 유형',l.customer_type)}${info('현재 통신사',l.current_carrier||'-')}${info('약정 만료일',dateOnly(l.contract_end_date))}${info('담당자',profileName(l.assigned_to))}${info('진행 상태',`<span class="badge ${statusClass(l.status)}">${esc(l.status)}</span>`)}${info('다음 연락',dateTime(l.next_follow_up_at))}${info('예상 금액',money(l.expected_value)+'원')}</div>
+  <div class="card" style="box-shadow:none;margin-top:13px"><div class="card-head"><h3>관심 상품</h3></div><div class="card-pad products">${(l.interested_products||[]).length?(l.interested_products||[]).map(p=>`<span class="chip">${esc(p)}</span>`).join(''):'<span class="muted small">등록된 상품 없음</span>'}</div></div>
+  <div class="card" style="box-shadow:none;margin-top:13px"><div class="card-head"><h3>상품별 메모</h3></div><div class="card-pad">${(l.interested_products||[]).length?(l.interested_products||[]).map(p=>`<div class="product-note-view"><b>${esc(p)}</b><p>${esc((l.product_notes||{})[p]||'메모 없음')}</p></div>`).join(''):'<span class="muted small">등록된 상품이 없습니다.</span>'}</div></div>
+  <div class="card" style="box-shadow:none;margin-top:13px"><div class="card-head"><h3>지원금 · 사은품 · 요청</h3><span class="badge ${flags.length?'b-active':'b-gray'}">${flags.length}개 항목</span></div><div class="card-pad"><div class="products" style="margin-bottom:10px">${flags.length?flags.map(x=>`<span class="chip">${esc(x)}</span>`).join(''):'<span class="muted small">선택된 지원 항목 없음</span>'}</div><div class="info-grid">${info('기본 지원금',money(l.standard_support_amount)+'원')}${info('별도 사은품',money(l.additional_gift_amount)+'원')}${info('위약금 지원',money(l.penalty_support_amount)+'원')}${info('현금 지원 요청',money(requested)+'원')}${info('제공 예정 합계',money(offered)+'원')}${info('요청액 포함 참고 합계',money(offered+requested)+'원')}</div><div style="font-size:13px;white-space:pre-wrap;margin-top:12px">${esc(l.support_memo||'지원 관련 메모가 없습니다.')}</div></div></div>
+  <div class="card" style="box-shadow:none;margin-top:13px"><div class="card-head"><h3>전체 상담 요약</h3></div><div class="card-pad" style="font-size:13px;white-space:pre-wrap">${esc(l.memo||'등록된 메모가 없습니다.')}</div></div></div>
+  <div><div class="card" style="box-shadow:none"><div class="card-head"><h3>상담 이력</h3><span class="badge b-gray">${ns.length}건</span></div><div class="card-pad"><div class="note-form"><textarea id="newNote" class="textarea" rows="3" placeholder="통화 또는 상담 내용을 입력하세요."></textarea><div class="form-grid" style="margin-top:8px"><div class="field"><label>다음 연락일</label><input id="noteFollow" class="input" type="datetime-local"></div><div style="display:flex;align-items:end"><button class="btn primary" style="width:100%" onclick="addNote('${l.id}')">상담 이력 추가</button></div></div></div><div class="timeline">${ns.length?ns.map(n=>`<div class="timeline-item"><div class="timeline-meta">${esc(profileName(n.created_by))} · ${dateTime(n.created_at)}${n.follow_up_at?' · 다음 연락 '+dateTime(n.follow_up_at):''}</div><div class="timeline-content">${esc(n.content)}</div></div>`).join(''):'<div class="empty">상담 이력이 없습니다.</div>'}</div></div></div>
+  ${acts.length?`<div class="card" style="box-shadow:none;margin-top:13px"><div class="card-head"><h3>수정 활동</h3></div><div class="card-pad list">${acts.map(a=>`<div class="list-item"><div class="dot" style="background:#8a9099"></div><div><div class="list-title">${esc(profileName(a.user_id))} · ${esc(a.action)}</div><div class="list-sub">${dateTime(a.created_at)}</div></div></div>`).join('')}</div></div>`:''}</div>
+  </div></div></div></div>`}
+function info(k,v){return `<div class="info-box"><div class="k">${k}</div><div class="v">${v}</div></div>`}
+async function addNote(leadId){const content=$('#newNote').value.trim(),follow=$('#noteFollow').value;if(!content)return toast('상담 내용을 입력하세요.','err');const row={lead_id:leadId,content,follow_up_at:follow?isoLocal(follow):null,created_by:currentProfile.id,created_at:nowISO()};if(mode==='demo'){row.id=uuid();notes.unshift(row);const l=leads.find(x=>x.id===leadId);l.last_contact_at=nowISO();l.updated_at=nowISO();l.updated_by=currentProfile.id;if(row.follow_up_at){l.next_follow_up_at=row.follow_up_at;l.status='재통화 예정'}activities.unshift({id:uuid(),lead_id:leadId,action:'상담 이력 추가',detail:{},user_id:currentProfile.id,created_at:nowISO()});saveDemo()}else{let r=await sb.from('lead_notes').insert(row);if(r.error)return toast(r.error.message,'err');const update={last_contact_at:nowISO(),updated_by:currentProfile.id};if(row.follow_up_at){update.next_follow_up_at=row.follow_up_at;update.status='재통화 예정'}await sb.from('leads').update(update).eq('id',leadId);await logActivity(leadId,'상담 이력 추가',{})}toast('상담 이력이 추가되었습니다.');await refresh();openLeadDetail(leadId)}
+async function softDeleteLead(id){if(!isManager())return toast('팀장 이상만 휴지통으로 이동할 수 있습니다.','err');if(!confirm('이 DB를 휴지통으로 이동할까요?'))return;if(mode==='demo'){const l=leads.find(x=>x.id===id);l.deleted_at=nowISO();l.updated_at=nowISO();saveDemo()}else{const r=await sb.from('leads').update({deleted_at:nowISO(),updated_by:currentProfile.id}).eq('id',id);if(r.error)return toast(r.error.message,'err');await logActivity(id,'휴지통 이동',{})}closeModal();toast('휴지통으로 이동했습니다.');await refresh()}
+async function restoreLead(id){if(!isManager())return;if(mode==='demo'){const l=leads.find(x=>x.id===id);l.deleted_at=null;l.updated_at=nowISO();saveDemo()}else{const r=await sb.from('leads').update({deleted_at:null,updated_by:currentProfile.id}).eq('id',id);if(r.error)return toast(r.error.message,'err');await logActivity(id,'복원',{})}toast('DB를 복원했습니다.');await refresh()}
+
+function csvEscape(v){v=String(v??'');return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
+function exportCSV(){const productHeads=PRODUCTS.map(p=>`${p}메모`);const head=['DB번호','등록일','유입구분','유입경로','고객유형','상호명','고객명','연락처','지역','관심상품',...productHeads,'지원항목','기본지원금','별도사은품','위약금지원','현금지원요청액','지원메모','현재통신사','약정만료일','담당자','진행상태','다음연락일','예상금액','실패사유','전체메모'];const rows=activeLeads().map(l=>[leadCode(l),l.created_at,l.source_type,l.source_channel,l.customer_type,l.business_name,l.customer_name,l.phone,l.region,(l.interested_products||[]).join('|'),...PRODUCTS.map(p=>(l.product_notes||{})[p]||''),(l.support_flags||[]).join('|'),l.standard_support_amount,l.additional_gift_amount,l.penalty_support_amount,l.cash_support_request_amount,l.support_memo,l.current_carrier,l.contract_end_date,profileName(l.assigned_to),l.status,l.next_follow_up_at,l.expected_value,l.failure_reason,l.memo]);const blob=new Blob(['\ufeff'+[head,...rows].map(r=>r.map(csvEscape).join(',')).join('\n')],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`메뉴잇xKT_영업DB_${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(a.href)}
+function parseCSV(text){const rows=[];let row=[],cell='',q=false;for(let i=0;i<text.length;i++){const c=text[i],n=text[i+1];if(c==='"'&&q&&n==='"'){cell+='"';i++}else if(c==='"')q=!q;else if(c===','&&!q){row.push(cell);cell=''}else if((c==='\n'||c==='\r')&&!q){if(c==='\r'&&n==='\n')i++;row.push(cell);if(row.some(x=>x!==''))rows.push(row);row=[];cell=''}else cell+=c}row.push(cell);if(row.some(x=>x!==''))rows.push(row);return rows}
+async function importCSV(file){if(!file)return;const text=await file.text();const rows=parseCSV(text.replace(/^\ufeff/,''));if(rows.length<2)return toast('CSV 데이터가 없습니다.','err');const h=rows[0].map(x=>x.trim());const get=(r,...names)=>{for(const n of names){const i=h.indexOf(n);if(i>=0)return (r[i]||'').trim()}return''};const num=(r,...names)=>Number((get(r,...names)||'0').replace(/[^0-9.-]/g,''))||0;const items=rows.slice(1).map(r=>{const interested_products=(get(r,'관심상품')||'').split(/[|/;]/).map(x=>x.trim()).filter(Boolean),product_notes={};PRODUCTS.forEach(p=>{const v=get(r,`${p}메모`);if(v)product_notes[p]=v});return {source_type:get(r,'유입구분')||'인바운드',source_channel:get(r,'유입경로')||'기타',customer_type:get(r,'고객유형')||'매장 사장님',business_name:get(r,'상호명'),customer_name:get(r,'고객명')||'미입력',phone:get(r,'연락처'),region:get(r,'지역'),interested_products,product_notes,support_flags:(get(r,'지원항목')||'').split(/[|/;]/).map(x=>x.trim()).filter(Boolean),standard_support_amount:num(r,'기본지원금'),additional_gift_amount:num(r,'별도사은품'),penalty_support_amount:num(r,'위약금지원'),cash_support_request_amount:num(r,'현금지원요청액'),support_memo:get(r,'지원메모')||null,current_carrier:get(r,'현재통신사')||null,contract_end_date:get(r,'약정만료일')||null,assigned_to:currentProfile.id,status:get(r,'진행상태')||'신규 DB',next_follow_up_at:get(r,'다음연락일')?isoLocal(get(r,'다음연락일')):null,expected_value:num(r,'예상금액'),memo:get(r,'전체메모','메모')||null,created_by:currentProfile.id,updated_by:currentProfile.id,created_at:nowISO(),updated_at:nowISO(),deleted_at:null}}).filter(x=>x.phone);
+  if(!items.length)return toast('연락처가 있는 행을 찾지 못했습니다.','err');if(!confirm(`${items.length}건을 가져올까요?`))return;
+  if(mode==='demo'){let no=Math.max(0,...leads.map(l=>Number(l.lead_no)||0));items.forEach(x=>{x.id=uuid();x.lead_no=++no;leads.unshift(x)});saveDemo()}else{const r=await sb.from('leads').insert(items);if(r.error)return toast(r.error.message,'err')}toast(`${items.length}건을 가져왔습니다.`);await refresh();
+}
+
+
+window.addEventListener('DOMContentLoaded',boot);
+</script>
+</body>
+</html>
